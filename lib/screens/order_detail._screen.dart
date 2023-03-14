@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'google_map_screen.dart';
 import 'model/order_model.dart';
 import 'order_pdf_screen.dart';
 import 'provider/order_repository.dart';
@@ -23,8 +24,8 @@ class _OrderDetailState extends ConsumerState<OrderDetail>
         .watch(OrderRepository.futureOrderDetailProvider("1"));
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chi tiết đơn hàng #A001',
-            style: const TextStyle(
+        title: const Text('Chi tiết đơn hàng #A001',
+            style: TextStyle(
                 color: Color(0xff222222),
                 fontSize: 18,
                 fontWeight: FontWeight.w500)),
@@ -428,12 +429,14 @@ class _OrderDetailState extends ConsumerState<OrderDetail>
                                 )
                               ],
                             ),
+
                           ],
                         ),
                       ),
                     ],
                   ),
                 ),
+                GoogleMapScreen()
               ],
             ),
           );
@@ -535,7 +538,8 @@ class ListProductOrder extends ConsumerWidget {
                                         strokeAlign:
                                         BorderSide.strokeAlignCenter)),
                               ),
-                            ]),
+                            ],
+                        ),
                       ),
                     ],
                   ),

@@ -1,6 +1,5 @@
-// ignore_for_file: prefer_const_constructors, non_constant_identifier_names
+// ignore_for_file: prefer_const_constructors, non_constant_identifier_names, library_private_types_in_public_api, library_prefixes
 
-import 'dart:typed_data';
 import 'package:demopdf/screens/provider/order_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,7 +14,7 @@ import 'model/order_model.dart';
 class PDFView extends ConsumerStatefulWidget {
   final int id;
 
-  PDFView({Key? key, required this.id}) : super(key: key);
+  const PDFView({Key? key, required this.id}) : super(key: key);
 
   @override
   _PDFViewState createState() => _PDFViewState();
@@ -27,7 +26,6 @@ class _PDFViewState extends ConsumerState<PDFView>
   Widget build(BuildContext context) {
     final listDetail = ref
         .watch(OrderRepository.futureOrderDetailProvider(widget.id.toString()));
-
     return Scaffold(
         appBar: AppBar(title: Text("PDF")),
         body: listDetail.when(
@@ -80,7 +78,7 @@ class _PDFViewState extends ConsumerState<PDFView>
                     children: [
                       pdfWid.Row(
                         mainAxisAlignment: pdfWid.MainAxisAlignment.start,
-                        crossAxisAlignment: pdfWid.CrossAxisAlignment.start,
+                        crossAxisAlignment: pdfWid.CrossAxisAlignment.center,
                         children: [
                           pdfWid.Image(pdfWid.MemoryImage(byteList),
                               fit: pdfWid.BoxFit.fitHeight,
@@ -91,18 +89,27 @@ class _PDFViewState extends ConsumerState<PDFView>
                             mainAxisAlignment: pdfWid.MainAxisAlignment.start,
                             crossAxisAlignment: pdfWid.CrossAxisAlignment.start,
                             children: [
-                              pdfWid.Text("Công Ty TNHH ACB",
+                              pdfWid.Text("Sneaker Vietnam",
                                   style: pdfWid.TextStyle(
                                       font: font_gg_b, fontSize: 20)),
                               pdfWid.SizedBox(height: 5),
-                              pdfWid.Row(children: [
-                                pdfWid.Text("Địa Chỉ:",
-                                    style: pdfWid.TextStyle(
-                                        font: font_gg_b, fontSize: 15)),
-                                pdfWid.Text(" Saigon Tel",
-                                    style: pdfWid.TextStyle(
-                                        font: font_gg_r, fontSize: 14)),
-                              ]),
+                              pdfWid.Row(
+                                mainAxisAlignment: pdfWid.MainAxisAlignment.start,
+                                crossAxisAlignment: pdfWid.CrossAxisAlignment.start,
+                                children: [
+                                  pdfWid.Text("Địa Chỉ:",
+                                      style: pdfWid.TextStyle(
+                                          font: font_gg_b, fontSize: 15)),
+                                  pdfWid.Container(
+                                    width: 300,
+                                    child: pdfWid.Text(
+                                        " 425/16 NĐC, Phường 5, Quận 3, TP. HCM",
+                                        style: pdfWid.TextStyle(
+                                            font: font_gg_r, fontSize: 14),
+                                        softWrap: true),
+                                  )
+                                ],
+                              ),
                               pdfWid.SizedBox(height: 5),
                               pdfWid.Row(children: [
                                 pdfWid.Text("ĐT:",
@@ -264,8 +271,7 @@ class _PDFViewState extends ConsumerState<PDFView>
                                   4: pdfWid.FixedColumnWidth(57),
                                   5: pdfWid.FixedColumnWidth(57),
                                 },
-                                children:
-                                    listProduct(id: data.id, font: font_gg_r)),
+                                children: listProduct(id: data.id, font: font_gg_r)),
                             pdfWid.Table(
                               border: pdfWid.TableBorder.all(),
                               defaultVerticalAlignment:
@@ -279,10 +285,12 @@ class _PDFViewState extends ConsumerState<PDFView>
                                   children: [
                                     pdfTitle(
                                         "Thuế VAT 10% (nếu có)", font_gg_b),
-                                    pdfTitle( NumberFormat.simpleCurrency(
-                                        locale: 'vi-VN',
-                                        decimalDigits: 0)
-                                        .format(priceVat(data.totalPrice)),font_gg_r),
+                                    pdfTitle(
+                                        NumberFormat.simpleCurrency(
+                                                locale: 'vi-VN',
+                                                decimalDigits: 0)
+                                            .format(priceVat(data.totalPrice)),
+                                        font_gg_r),
                                   ],
                                 ),
                               ],
@@ -303,7 +311,8 @@ class _PDFViewState extends ConsumerState<PDFView>
                                         NumberFormat.simpleCurrency(
                                                 locale: 'vi-VN',
                                                 decimalDigits: 0)
-                                            .format(totalPrice(data.totalPrice)),
+                                            .format(
+                                            totalPriceVat(data.totalPrice)),
                                         font_gg_r),
                                   ],
                                 ),
@@ -347,10 +356,7 @@ class _PDFViewState extends ConsumerState<PDFView>
         pdfWid.TableRow(children: [pdfWid.Text("error")])
       ],
       data: (data) {
-        return data!
-            .asMap()
-            .entries
-            .map(
+        return data!.asMap().entries.map(
               (e) => pdfWid.TableRow(
                 children: [
                   pdfTitle((e.key + 1).toString(), font),
@@ -365,27 +371,28 @@ class _PDFViewState extends ConsumerState<PDFView>
                   pdfTitle(
                       NumberFormat.simpleCurrency(
                               locale: 'vi-VN', decimalDigits: 0)
-                          .format(priceTT(
-                              e.value.regularPrice, e.value.quantity)),
+                          .format(
+                              priceTT(e.value.regularPrice, e.value.quantity)),
                       font),
                 ],
               ),
-            )
-            .toList();
+            ).toList();
       },
       loading: () => [
         pdfWid.TableRow(children: [pdfWid.Text("error")])
       ],
     );
   }
+
   int priceTT(int? va, int? va2) {
     return va! * va2!;
   }
-  double priceVat(int? totalPrice){
+
+  double priceVat(int? totalPrice) {
     return totalPrice! * 0.1;
   }
 
-  double totalPrice(int? totalPrice){
+  double totalPriceVat(int? totalPrice) {
     return totalPrice! + priceVat(totalPrice);
   }
 }

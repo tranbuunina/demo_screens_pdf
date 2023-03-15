@@ -22,6 +22,7 @@ class PDFView extends ConsumerStatefulWidget {
 
 class _PDFViewState extends ConsumerState<PDFView>
     with TickerProviderStateMixin {
+
   @override
   Widget build(BuildContext context) {
     final listDetail = ref
@@ -47,11 +48,12 @@ class _PDFViewState extends ConsumerState<PDFView>
     final font_gg_b = await PdfGoogleFonts.robotoBold();
     final font_gg_r = await PdfGoogleFonts.robotoRegular();
     final DateTime now = DateTime.now();
-
     final pdf = pdfWid.Document(
       version: PdfVersion.pdf_1_5,
       compress: true,
     );
+
+
     pdf.addPage(
       pdfWid.MultiPage(
         pageTheme: pdfWid.PageTheme(
@@ -289,7 +291,7 @@ class _PDFViewState extends ConsumerState<PDFView>
                                         NumberFormat.simpleCurrency(
                                                 locale: 'vi-VN',
                                                 decimalDigits: 0)
-                                            .format(priceVat(data.totalPrice)),
+                                            .format(priceVat(data: data.product)),
                                         font_gg_r),
                                   ],
                                 ),
@@ -309,10 +311,9 @@ class _PDFViewState extends ConsumerState<PDFView>
                                     pdfTitle("Tổng cộng", font_gg_b),
                                     pdfTitle(
                                         NumberFormat.simpleCurrency(
-                                                locale: 'vi-VN',
-                                                decimalDigits: 0)
-                                            .format(
-                                            totalPriceVat(data.totalPrice)),
+                                            locale: 'vi-VN',
+                                            decimalDigits: 0)
+                                            .format(totalPrice(data: data.product) + priceVat(data: data.product)),
                                         font_gg_r),
                                   ],
                                 ),
@@ -388,14 +389,22 @@ class _PDFViewState extends ConsumerState<PDFView>
     return va! * va2!;
   }
 
-  double priceVat(int? totalPrice) {
-    return totalPrice! * 0.1;
+  double priceVat({List<Product>? data}) {
+    return totalPrice(data: data) * 0.1;
   }
 
-  double totalPriceVat(int? totalPrice) {
-    return totalPrice! + priceVat(totalPrice);
+  double totalPrice({List<Product>? data}){
+    double totalScores = 0.0;
+    data?.forEach((element) {
+      totalScores += priceTT(int.parse(element.quantity.toString()), int.parse(element.regularPrice.toString()));
+    });
+    return totalScores;
   }
+
+
+
 }
+
 
 pdfWid.Container pdfTitle(String title, pdfWid.Font font_gg_r) {
   return pdfWid.Container(

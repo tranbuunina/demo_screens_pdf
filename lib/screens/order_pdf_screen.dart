@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, non_constant_identifier_names, library_private_types_in_public_api, library_prefixes
 
+import 'dart:io';
 import 'package:demopdf/screens/provider/order_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,7 +9,6 @@ import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pdfWid;
 import 'package:printing/printing.dart';
-
 import 'model/order_model.dart';
 
 class PDFView extends ConsumerStatefulWidget {
@@ -47,8 +47,9 @@ class _PDFViewState extends ConsumerState<PDFView>
     final font_gg_b = await PdfGoogleFonts.robotoBold();
     final font_gg_r = await PdfGoogleFonts.robotoRegular();
     final DateTime now = DateTime.now();
+    final listProduct =
+        await getProductList(data?.product ?? <Product>[], font_gg_r);
     var footerMultiPageCount = 0;
-    var headerMultiPageCount = 0;
     final pdf = pdfWid.Document(
       version: PdfVersion.pdf_1_5,
       compress: true,
@@ -74,7 +75,6 @@ class _PDFViewState extends ConsumerState<PDFView>
             );
           },
         ),
-
         build: (context) {
           return [
             pdfWid.Wrap(
@@ -243,17 +243,19 @@ class _PDFViewState extends ConsumerState<PDFView>
                           pdfWid.TableCellVerticalAlignment.middle,
                       columnWidths: {
                         0: pdfWid.FixedColumnWidth(31),
-                        1: pdfWid.FixedColumnWidth(41),
-                        2: pdfWid.FixedColumnWidth(91),
-                        3: pdfWid.FixedColumnWidth(33),
-                        4: pdfWid.FixedColumnWidth(57),
+                        1: pdfWid.FixedColumnWidth(45),
+                        2: pdfWid.FixedColumnWidth(50),
+                        3: pdfWid.FixedColumnWidth(91),
+                        4: pdfWid.FixedColumnWidth(33),
                         5: pdfWid.FixedColumnWidth(57),
+                        6: pdfWid.FixedColumnWidth(57),
                       },
                       children: [
                         pdfWid.TableRow(
                           children: [
                             pdfTitle("STT", font_gg_b),
                             pdfTitle("MĐH", font_gg_b),
+                            pdfTitle("Hình Ảnh", font_gg_b),
                             pdfTitle("Tên Sản Phẩm", font_gg_b),
                             pdfTitle("SL", font_gg_b),
                             pdfTitle("Đơn Giá", font_gg_b),
@@ -267,67 +269,80 @@ class _PDFViewState extends ConsumerState<PDFView>
                           pdfWid.TableCellVerticalAlignment.middle,
                       columnWidths: {
                         0: pdfWid.FixedColumnWidth(31),
-                        1: pdfWid.FixedColumnWidth(41),
-                        2: pdfWid.FixedColumnWidth(91),
-                        3: pdfWid.FixedColumnWidth(33),
-                        4: pdfWid.FixedColumnWidth(57),
+                        1: pdfWid.FixedColumnWidth(45),
+                        2: pdfWid.FixedColumnWidth(50),
+                        3: pdfWid.FixedColumnWidth(91),
+                        4: pdfWid.FixedColumnWidth(33),
                         5: pdfWid.FixedColumnWidth(57),
-                      },
-                      children: listProduct(id: data.id, font: font_gg_r)),
-                  pdfWid.Table(
-                    border: pdfWid.TableBorder.all(),
-                    defaultVerticalAlignment:
-                        pdfWid.TableCellVerticalAlignment.middle,
-                    columnWidths: {
-                      0: pdfWid.FixedColumnWidth(90),
-                      1: pdfWid.FixedColumnWidth(20.3),
-                    },
-                    children: [
-                      pdfWid.TableRow(
-                        children: [
-                          pdfWid.Container(
-                              child: pdfWid.Text('Thuế VAT 10% (nếu có)',style: pdfWid.TextStyle(fontSize: 15,font: font_gg_b),textAlign: pdfWid.TextAlign.right),
-                              margin: pdfWid.EdgeInsets.only(right: 10),
-                              padding: pdfWid.EdgeInsets.all(5)
-                          ),
-                          pdfWid.Container(
-                            child: pdfWid.Text( NumberFormat.simpleCurrency(
-                                locale: 'vi-VN', decimalDigits: 0)
-                                .format(priceVat(data: data.product)),style: pdfWid.TextStyle(fontSize: 15,font: font_gg_r),textAlign: pdfWid.TextAlign.right),
-                            margin: pdfWid.EdgeInsets.only(right: 10),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  pdfWid.Table(
-                    border: pdfWid.TableBorder.all(),
-                    defaultVerticalAlignment:
-                        pdfWid.TableCellVerticalAlignment.middle,
-                    columnWidths: {
-                      0: pdfWid.FixedColumnWidth(90),
-                      1: pdfWid.FixedColumnWidth(20.3),
-                    },
-                    children: [
-                      pdfWid.TableRow(
-                        children: [
-                          pdfWid.Container(
-                            child: pdfWid.Text('Tổng cộng',style: pdfWid.TextStyle(fontSize: 15,font: font_gg_b),textAlign: pdfWid.TextAlign.right),
-                            margin: pdfWid.EdgeInsets.only(right: 10),
-                            padding: pdfWid.EdgeInsets.all(5)
-                          ),
-                          pdfWid.Container(
-                              child: pdfWid.Text( NumberFormat.simpleCurrency(
-                                  locale: 'vi-VN', decimalDigits: 0)
-                                  .format(totalPrice(data: data.product) +
-                                  priceVat(data: data.product)),style: pdfWid.TextStyle(fontSize: 15,font: font_gg_r),textAlign: pdfWid.TextAlign.right),
-                              margin: pdfWid.EdgeInsets.only(right: 10),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        6: pdfWid.FixedColumnWidth(57),
 
+                      },
+                      children: listProduct),
+                  pdfWid.Table(
+                    border: pdfWid.TableBorder.all(),
+                    defaultVerticalAlignment:
+                        pdfWid.TableCellVerticalAlignment.middle,
+                    columnWidths: {
+                      0: pdfWid.FixedColumnWidth(48.7),
+                      1: pdfWid.FixedColumnWidth(20.3),
+                    },
+                    children: [
+                      pdfWid.TableRow(
+                        children: [
+                          pdfWid.Container(
+                              child: pdfWid.Text('Thuế VAT 10% (nếu có)',
+                                  style: pdfWid.TextStyle(
+                                      fontSize: 15, font: font_gg_b),
+                                  textAlign: pdfWid.TextAlign.right),
+                              margin: pdfWid.EdgeInsets.only(right: 10),
+                              padding: pdfWid.EdgeInsets.all(5)),
+                          pdfWid.Container(
+                            child: pdfWid.Text(
+                                NumberFormat.simpleCurrency(
+                                        locale: 'vi-VN', decimalDigits: 0)
+                                    .format(priceVat(data: data.product)),
+                                style: pdfWid.TextStyle(
+                                    fontSize: 15, font: font_gg_r),
+                                textAlign: pdfWid.TextAlign.right),
+                            margin: pdfWid.EdgeInsets.only(right: 10),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  pdfWid.Table(
+                    border: pdfWid.TableBorder.all(),
+                    defaultVerticalAlignment:
+                        pdfWid.TableCellVerticalAlignment.middle,
+                    columnWidths: {
+                      0: pdfWid.FixedColumnWidth(48.7),
+                      1: pdfWid.FixedColumnWidth(20.3),
+                    },
+                    children: [
+                      pdfWid.TableRow(
+                        children: [
+                          pdfWid.Container(
+                              child: pdfWid.Text('Tổng cộng',
+                                  style: pdfWid.TextStyle(
+                                      fontSize: 15, font: font_gg_b),
+                                  textAlign: pdfWid.TextAlign.right),
+                              margin: pdfWid.EdgeInsets.only(right: 10),
+                              padding: pdfWid.EdgeInsets.all(5)),
+                          pdfWid.Container(
+                            child: pdfWid.Text(
+                                NumberFormat.simpleCurrency(
+                                        locale: 'vi-VN', decimalDigits: 0)
+                                    .format(totalPrice(data: data.product) +
+                                        priceVat(data: data.product)),
+                                style: pdfWid.TextStyle(
+                                    fontSize: 15, font: font_gg_r),
+                                textAlign: pdfWid.TextAlign.right),
+                            margin: pdfWid.EdgeInsets.only(right: 10),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                   pdfWid.SizedBox(height: 15),
                   pdfWid.Container(
                     child: pdfWid.Column(
@@ -350,52 +365,16 @@ class _PDFViewState extends ConsumerState<PDFView>
         },
         footer: (context) {
           footerMultiPageCount++;
-          return pdfWid.Header(level: 3, text: 'Page: ${context.pageNumber}',textStyle: pdfWid.TextStyle(font: font_gg_r,fontSize: 13));
+          return pdfWid.Header(
+            level: 3,
+            text: 'Page: ${context.pageNumber}',
+            textStyle: pdfWid.TextStyle(font: font_gg_r, fontSize: 13),
+          );
         },
       ),
     );
 
     return pdf.save();
-  }
-
-  List<pdfWid.TableRow> listProduct({int? id, required pdfWid.Font font}) {
-    final idListProduct =
-        ref.watch(OrderRepository.futureProductForDetailProvider('$id'));
-    return idListProduct.when(
-      error: (err, stack) => [
-        pdfWid.TableRow(children: [pdfWid.Text("error")])
-      ],
-      data: (data) {
-        return data!
-            .asMap()
-            .entries
-            .map(
-              (e) => pdfWid.TableRow(
-                children: [
-                  pdfTitle((e.key + 1).toString(), font),
-                  pdfTitle(e.value.code.toString(), font),
-                  pdfTitle(e.value.name.toString(), font),
-                  pdfTitle(e.value.quantity.toString(), font),
-                  pdfTitle(
-                      NumberFormat.simpleCurrency(
-                              locale: 'vi-VN', decimalDigits: 0)
-                          .format(e.value.regularPrice),
-                      font),
-                  pdfTitle(
-                      NumberFormat.simpleCurrency(
-                              locale: 'vi-VN', decimalDigits: 0)
-                          .format(
-                              priceTT(e.value.regularPrice, e.value.quantity)),
-                      font),
-                ],
-              ),
-            )
-            .toList();
-      },
-      loading: () => [
-        pdfWid.TableRow(children: [pdfWid.Text("error")])
-      ],
-    );
   }
 
   int priceTT(int? va, int? va2) {
@@ -414,13 +393,55 @@ class _PDFViewState extends ConsumerState<PDFView>
     });
     return totalScores;
   }
+
+  getProductList(List<Product> products, pdfWid.Font font) async {
+    final listProduct = <pdfWid.TableRow>[];
+    for (int i = 0; i < products.length; i++) {
+      final img = await getImages(data: products[i]);
+      final item = pdfWid.TableRow(
+        children: [
+          pdfTitle((i + 1).toString(), font),
+          pdfTitle(products[i].code.toString(), font),
+          img,  
+          pdfTitle(products[i].name.toString(), font),
+          pdfTitle(products[i].quantity.toString(), font),
+          pdfTitle(
+              NumberFormat.simpleCurrency(locale: 'vi-VN', decimalDigits: 0)
+                  .format(products[i].regularPrice),
+              font),
+          pdfTitle(
+              NumberFormat.simpleCurrency(locale: 'vi-VN', decimalDigits: 0)
+                  .format(
+                      priceTT(products[i].regularPrice, products[i].quantity)),
+              font),
+        ],
+      );
+      listProduct.add(item);
+    }
+    return listProduct;
+  }
+}
+
+Future<pdfWid.Column> getImages({required Product data}) async {
+  final netImage = await networkImage(data.photo ?? "");
+  return pdfWid.Column(
+    crossAxisAlignment: pdfWid.CrossAxisAlignment.center,
+    mainAxisAlignment: pdfWid.MainAxisAlignment.center,
+    children: [
+      pdfWid.Container(
+        padding: pdfWid.EdgeInsets.all(5),
+        child: pdfWid.Image(netImage,
+            width: 60, height: 50, fit: pdfWid.BoxFit.cover),
+      ),
+    ],
+  );
 }
 
 pdfWid.Container pdfTitle(String title, pdfWid.Font font_gg_r) {
   return pdfWid.Container(
     padding: pdfWid.EdgeInsets.all(5),
     child: pdfWid.Text(title,
-        style: pdfWid.TextStyle(fontSize: 15, font: font_gg_r),
+        style: pdfWid.TextStyle(fontSize: 14, font: font_gg_r),
         textAlign: pdfWid.TextAlign.center),
   );
 }

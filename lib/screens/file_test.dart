@@ -248,6 +248,7 @@ class _PDFViewState extends ConsumerState<PDFView>
                                   3: pdfWid.FixedColumnWidth(33),
                                   4: pdfWid.FixedColumnWidth(57),
                                   5: pdfWid.FixedColumnWidth(57),
+                                  6: pdfWid.FixedColumnWidth(50),
                                 },
                                 children: [
                                   pdfWid.TableRow(
@@ -258,6 +259,7 @@ class _PDFViewState extends ConsumerState<PDFView>
                                       pdfTitle("SL", font_gg_b),
                                       pdfTitle("Đơn Giá", font_gg_b),
                                       pdfTitle("Thành Tiền", font_gg_b),
+                                      pdfTitle("Hình Ảnh", font_gg_b),
                                     ],
                                   ),
                                 ]),
@@ -272,6 +274,7 @@ class _PDFViewState extends ConsumerState<PDFView>
                                   3: pdfWid.FixedColumnWidth(33),
                                   4: pdfWid.FixedColumnWidth(57),
                                   5: pdfWid.FixedColumnWidth(57),
+                                  6: pdfWid.FixedColumnWidth(50),
                                 },
                                 children:
                                     listProduct(id: data.id, font: font_gg_r)),
